@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 1 — The Fuel That Runs the World · Black Gold</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0d0d0d;
+    --ink-soft:   #141414;
+    --ink-card:   #181818;
+    --paper:      #f5f0e8;
+    --gold:       #c9a84c;
+    --gold-light: #e8d5a3;
+    --gold-dim:   #8a6f32;
+    --sand:       #d4c5a9;
+    --muted:      #6b6560;
+    --line:       rgba(201,168,76,0.18);
+    --line-soft:  rgba(255,255,255,0.07);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9000; opacity: 0.5;
+  }
+
+  /* ── CURSOR ── */
+  #cur  { width:10px;height:10px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:screen; }
+  #ring { width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);opacity:.4;transition:width .25s,height .25s,opacity .2s; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 2rem 4rem;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,13,13,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.22em; color:var(--gold); text-decoration:none; }
+  nav { display:flex; gap:2.5rem; align-items:center; }
+  nav a { font-size:11px; font-weight:400; letter-spacing:.12em; text-transform:uppercase; color:var(--sand); text-decoration:none; transition:color .2s; }
+  nav a:hover { color:var(--gold); }
+  .nav-back { display:flex; align-items:center; gap:8px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color .2s; }
+  .nav-back:hover { color:var(--gold); }
+
+  /* ── ARTICLE HERO ── */
+  .art-hero {
+    padding: 6rem 4rem 5rem;
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .art-eyebrow {
+    display: flex; align-items: center; gap: 14px;
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2.5rem;
+    opacity: 0; animation: rise .8s .1s ease forwards;
+  }
+  .art-eyebrow::before { content:''; width:36px; height:1px; background:var(--gold); }
+
+  .art-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.8rem, 5.5vw, 4.5rem);
+    font-weight: 600; line-height: 1.1;
+    color: var(--paper); margin-bottom: 1.5rem;
+    opacity: 0; animation: rise .9s .25s ease forwards;
+  }
+
+  .art-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem; font-weight: 300; font-style: italic;
+    line-height: 1.7; color: var(--sand);
+    border-left: 2px solid var(--gold);
+    padding-left: 1.2rem; max-width: 600px;
+    margin-bottom: 2rem;
+    opacity: 0; animation: rise .9s .4s ease forwards;
+  }
+
+  .art-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: var(--muted);
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--line);
+    opacity: 0; animation: rise .9s .55s ease forwards;
+  }
+  .art-meta .dot { color: var(--gold-dim); }
+
+  @keyframes rise {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── ARTICLE BODY ── */
+  .art-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 4rem 6rem;
+  }
+
+  .art-body p {
+    font-size: 1.05rem; line-height: 1.9;
+    color: var(--sand); font-weight: 300;
+    margin-bottom: 1.4rem;
+  }
+
+  .art-body p strong { color: var(--paper); font-weight: 500; }
+
+  .art-body h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.1rem; font-weight: 600;
+    color: var(--paper); margin: 3.5rem 0 1.2rem;
+    padding-top: 3.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .art-body h3 {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--gold); margin: 2.5rem 0 1rem;
+  }
+
+  .art-divider {
+    border: none; border-top: 1px solid var(--line);
+    margin: 2.5rem 0;
+  }
+
+  /* Callout box */
+  .callout {
+    background: rgba(201,168,76,0.07);
+    border-left: 2px solid var(--gold);
+    padding: 1.2rem 1.5rem;
+    margin: 1.8rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout p { margin: 0; font-size: .95rem; color: var(--sand); }
+
+  /* Pull quote */
+  .pull-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-style: italic; font-weight: 300;
+    color: var(--gold-light); line-height: 1.55;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 1.8rem 2rem;
+    margin: 2.5rem 0;
+  }
+
+  /* ── PRODUCT CARDS ── */
+  .product-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line);
+    margin: 1.5rem 0;
+  }
+  .product-card {
+    background: var(--ink-card);
+    padding: 1.1rem 1.3rem;
+    transition: background .25s;
+  }
+  .product-card:hover { background: rgba(201,168,76,.06); }
+  .p-label { font-size: 13px; font-weight: 500; color: var(--paper); margin-bottom: 4px; }
+  .p-desc  { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+  /* ── CHART SECTION LABEL ── */
+  .chart-label {
+    font-size: 10px; font-weight: 500;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--gold-dim); margin-bottom: 1rem;
+  }
+
+  /* ── BAR CHART ── */
+  .bar-chart { margin: 1rem 0 .5rem; }
+  .bar-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .bar-country { font-size:12px; font-weight:500; color:var(--sand); min-width:110px; }
+  .bar-wrap { flex:1; background:rgba(255,255,255,.05); border-radius:0; height:24px; overflow:hidden; }
+  .bar-fill { height:100%; display:flex; align-items:center; justify-content:flex-end; padding-right:10px; }
+  .bar-fill span { font-size:11px; font-weight:500; color:var(--ink); white-space:nowrap; }
+  .source-note { font-size:11px; color:var(--muted); margin-top:.5rem; }
+
+  /* ── GCC CARDS ── */
+  .gcc-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line);
+    margin: 1.5rem 0;
+  }
+  .gcc-card {
+    background: var(--ink-card);
+    padding: 1.2rem 1.3rem;
+    transition: background .25s;
+    position: relative;
+  }
+  .gcc-card:hover { background: rgba(201,168,76,.06); }
+  .gcc-card.featured {
+    grid-column: span 3;
+    background: rgba(201,168,76,.07);
+    border-bottom: 1px solid var(--line);
+  }
+  .gcc-country { font-size:13px; font-weight:500; color:var(--paper); margin-bottom:5px; }
+  .gcc-detail  { font-size:12px; color:var(--muted); line-height:1.55; }
+
+  .badge {
+    display:inline-block; font-size:10px; font-weight:500;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding:3px 8px; border:1px solid; margin-bottom:8px;
+  }
+  .b-oil  { border-color:var(--gold-dim); color:var(--gold); }
+  .b-gas  { border-color:#185FA5; color:#7bb8f5; }
+  .b-both { border-color:#1D9E75; color:#6dcba8; }
+  .b-sm   { border-color:var(--muted); color:var(--muted); }
+
+  /* ── DEPENDENCY BARS ── */
+  .dep-table { margin:.75rem 0 .5rem; }
+  .dep-row {
+    display:flex; align-items:center; gap:12px;
+    padding:8px 0; border-bottom:1px solid var(--line-soft);
+  }
+  .dep-row:last-child { border-bottom:none; }
+  .dep-name { font-size:12px; font-weight:500; color:var(--sand); min-width:110px; }
+  .dep-wrap { flex:1; background:rgba(255,255,255,.05); height:8px; overflow:hidden; }
+  .dep-bar  { height:100%; }
+  .dep-pct  { font-size:11px; color:var(--muted); min-width:65px; text-align:right; }
+  .dep-type { font-size:10px; color:var(--gold-dim); min-width:72px; text-align:right; letter-spacing:.06em; }
+
+  /* ── NEXT PART CTA ── */
+  .next-part {
+    border: 1px solid var(--line);
+    padding: 2.5rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 4rem;
+    transition: background .3s;
+    text-decoration: none;
+  }
+  .next-part:hover { background: rgba(201,168,76,.06); }
+  .next-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-dim); margin-bottom:.5rem; }
+  .next-title { font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:600; color:var(--paper); }
+  .next-arrow { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:var(--gold); letter-spacing:.05em; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .f-logo { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:.2em; color:var(--gold-dim); }
+  .f-note { font-size:11px; color:var(--muted); letter-spacing:.06em; }
+
+  /* ── REVEAL ── */
+  .reveal { opacity:0; transform:translateY(20px); transition:opacity .7s ease,transform .7s ease; }
+  .reveal.in { opacity:1; transform:none; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    header{padding:1.5rem 2rem;}
+    .art-hero,.art-body{padding-left:2rem;padding-right:2rem;}
+    .art-title{font-size:2.2rem;}
+    .product-grid,.gcc-grid{grid-template-columns:1fr;}
+    .gcc-card.featured{grid-column:span 1;}
+    .next-part{flex-direction:column;gap:1.5rem;align-items:flex-start;}
+    footer{padding:2rem;flex-direction:column;gap:1rem;text-align:center;}
+  }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="ring"></div>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo">Black Gold</a>
+  <nav>
+    <a href="index.html" class="nav-back">← All Parts</a>
+    <a href="part2.html">Part 2</a>
+    <a href="part3.html">Part 3</a>
+  </nav>
+</header>
+
+<!-- ARTICLE HERO -->
+<div class="art-hero">
+  <div class="art-eyebrow">Part One · The Basics</div>
+  <h1 class="art-title">The Fuel That<br>Runs the World</h1>
+  <p class="art-subtitle">You hear about oil and gas every day — in the news, in prices at the pump, in politics. But what actually are they? And why does the Gulf matter so much?</p>
+  <div class="art-meta">
+    <span>6 min read</span>
+    <span class="dot">·</span>
+    <span>Energy &amp; Geopolitics</span>
+    <span class="dot">·</span>
+    <span>GCC Series</span>
+  </div>
+</div>
+
+<!-- ARTICLE BODY -->
+<article class="art-body">
+
+  <p>Six countries in the Middle East — Saudi Arabia, UAE, Qatar, Kuwait, Oman, and Bahrain — together form a group called the <strong>GCC (Gulf Cooperation Council)</strong>. These six countries sit on top of some of the biggest oil and gas reserves on the planet.</p>
+
+  <p>To understand why that's such a big deal, let's start from the beginning.</p>
+
+  <h2>What are fossil fuels?</h2>
+
+  <p>Fossil fuels are natural substances found deep underground. They formed over millions of years from the remains of plants and animals that got buried and compressed over time. Today, we dig them up and burn them to produce energy.</p>
+
+  <p>There are three main types: <strong>oil, natural gas, and coal.</strong> The GCC's story revolves almost entirely around the first two.</p>
+
+  <h3>Crude oil — what is it?</h3>
+
+  <p>Think of crude oil as raw, unprocessed oil — exactly as it comes out of the ground. It's a thick, dark liquid and on its own, you can't do much with it. But once it goes through a <strong>refinery</strong> (a facility that processes and separates it), it turns into things we use every single day:</p>
+
+  <div class="product-grid reveal">
+    <div class="product-card">
+      <div class="p-label">Gasoline (بنزين)</div>
+      <div class="p-desc">What you put in your car at the petrol station</div>
+    </div>
+    <div class="product-card">
+      <div class="p-label">Diesel (مازوت)</div>
+      <div class="p-desc">Trucks, generators — and heating in Lebanon and the region</div>
+    </div>
+    <div class="product-card">
+      <div class="p-label">Jet fuel (كيروسين)</div>
+      <div class="p-desc">Every plane in the sky runs on this</div>
+    </div>
+    <div class="product-card">
+      <div class="p-label">Plastics &amp; chemicals</div>
+      <div class="p-desc">Your water bottle, your phone case, your medicine packaging</div>
+    </div>
+  </div>
+
+  <div class="callout reveal">
+    <p>When you hear "crude oil supply," it simply means: how much raw oil is available in the world market right now — from all the countries producing and selling it.</p>
+  </div>
+
+  <h3>Natural gas — what is it?</h3>
+
+  <p>Natural gas is exactly what it sounds like — a gas that comes from underground. It's often found near oil fields, or in its own separate deposits. We measure it in <strong>cubic meters or cubic feet</strong>.</p>
+
+  <p>It's used to generate electricity, heat homes, run factories, and make fertilizers. One important thing to know: natural gas can be super-cooled into a liquid form called <strong>LNG (Liquefied Natural Gas)</strong>. This makes it possible to load onto ships and export it anywhere in the world — which is exactly how Qatar became one of the most powerful energy exporters on the planet.</p>
+
+  <h2>The GCC — who has what?</h2>
+
+  <p>Not all six GCC countries are equal when it comes to energy. Here's a simple breakdown of who exports how much, and in what form.</p>
+
+  <div class="chart-label reveal">Estimated fossil fuel exports per country (per year)</div>
+  <div class="bar-chart reveal">
+    <div class="bar-row">
+      <span class="bar-country">Saudi Arabia</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:100%;background:var(--gold);"><span>$310 billion</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-country">UAE</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:53%;background:#c47d20;"><span>$165 billion</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-country">Qatar</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:42%;background:#1D9E75;"><span>$130 billion</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-country">Kuwait</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:31%;background:#8b3a2a;"><span>$95 billion</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-country">Oman</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:21%;background:#5a4a8a;"><span>$65 billion</span></div></div>
+    </div>
+    <div class="bar-row">
+      <span class="bar-country">Bahrain</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:5%;background:#444;"><span>$15B</span></div></div>
+    </div>
+  </div>
+  <p class="source-note">Estimated figures based on research data</p>
+
+  <div class="gcc-grid reveal">
+    <div class="gcc-card featured">
+      <span class="badge b-oil">Biggest exporter</span>
+      <div class="gcc-country" style="font-size:15px;">Saudi Arabia — $310B/year</div>
+      <div class="gcc-detail" style="margin-top:6px;">The biggest oil exporter in the GCC — and one of the biggest in the world. It is the most powerful member of OPEC, the group that influences how much oil gets produced globally. Oil is the foundation of everything Saudi Arabia does economically.</div>
+    </div>
+    <div class="gcc-card">
+      <span class="badge b-gas">Gas leader</span>
+      <div class="gcc-country">Qatar — $130B/year</div>
+      <div class="gcc-detail">Qatar's secret weapon is natural gas. It sits on one of the largest gas fields in the world and ships LNG to countries across Asia and Europe.</div>
+    </div>
+    <div class="gcc-card">
+      <span class="badge b-both">Oil &amp; gas</span>
+      <div class="gcc-country">UAE — $165B/year</div>
+      <div class="gcc-detail">Second biggest exporter overall. Most of its oil and gas comes from Abu Dhabi.</div>
+    </div>
+    <div class="gcc-card">
+      <span class="badge b-both">Oil &amp; gas</span>
+      <div class="gcc-country">Kuwait — $95B/year</div>
+      <div class="gcc-detail">A major oil producer with large proven reserves underground.</div>
+    </div>
+    <div class="gcc-card">
+      <span class="badge b-both">Oil &amp; gas</span>
+      <div class="gcc-country">Oman — $65B/year</div>
+      <div class="gcc-detail">Smaller but growing, especially in LNG. A steady and reliable exporter.</div>
+    </div>
+    <div class="gcc-card">
+      <span class="badge b-sm">Smallest share</span>
+      <div class="gcc-country">Bahrain — $15B/year</div>
+      <div class="gcc-detail">The smallest in the group. Shares an offshore oil field with Saudi Arabia.</div>
+    </div>
+  </div>
+
+  <h2>Who buys all this energy?</h2>
+
+  <p>This is where things get interesting. Countries all over the world depend on GCC oil and gas to keep their lights on, their factories running, and their cars moving. The more a country depends on Gulf energy, the more it has to care about what happens there.</p>
+
+  <div class="pull-quote reveal">"When something goes wrong in the Gulf, the whole world feels it — at the pump, in electricity bills, and in the economy."</div>
+
+  <div class="chart-label reveal">How much of their energy comes from the GCC?</div>
+  <div class="dep-table reveal">
+    <div class="dep-row">
+      <span class="dep-name">Japan</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:90%;background:var(--gold);"></div></div>
+      <span class="dep-pct">~90%</span><span class="dep-type">Crude oil</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">S. Korea</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:75%;background:var(--gold);"></div></div>
+      <span class="dep-pct">70–80%</span><span class="dep-type">Crude oil</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">India</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:57%;background:var(--gold);"></div></div>
+      <span class="dep-pct">55–60%</span><span class="dep-type">Crude oil</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">China</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:45%;background:var(--gold);"></div></div>
+      <span class="dep-pct">40–50%</span><span class="dep-type">Crude oil</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">Singapore</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:35%;background:#c47d20;"></div></div>
+      <span class="dep-pct">30–40%</span><span class="dep-type">Crude oil</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">South Africa</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:25%;background:#c47d20;"></div></div>
+      <span class="dep-pct">20–30%</span><span class="dep-type">Crude oil</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">Italy</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:12%;background:#5a4a8a;"></div></div>
+      <span class="dep-pct">10–15%</span><span class="dep-type">Natural gas</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">Germany</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:7%;background:#5a4a8a;"></div></div>
+      <span class="dep-pct">5–10%</span><span class="dep-type">Natural gas</span>
+    </div>
+    <div class="dep-row">
+      <span class="dep-name">UK</span>
+      <div class="dep-wrap"><div class="dep-bar" style="width:7%;background:#5a4a8a;"></div></div>
+      <span class="dep-pct">5–10%</span><span class="dep-type">Natural gas</span>
+    </div>
+  </div>
+  <p class="source-note">Gold = crude oil dependency · Purple = natural gas dependency</p>
+
+  <hr class="art-divider">
+
+  <p>Japan gets nearly 90% of its oil from the GCC. South Korea gets 70–80%. Even big powers like China and India — with huge economies and populations — rely heavily on Gulf oil to keep going. Europe mostly buys natural gas, and that dependence grew even more after 2022 when Europe stopped buying Russian gas.</p>
+
+  <p>The bottom line? The GCC doesn't just sell fuel. <strong>It sells the world the ability to function.</strong></p>
+
+  <!-- NEXT PART -->
+  <a href="part2.html" class="next-part reveal">
+    <div>
+      <div class="next-label">Up next · Part Two</div>
+      <div class="next-title">What Moves the Price?</div>
+    </div>
+    <div class="next-arrow">→</div>
+  </a>
+
+</article>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">Black Gold — GCC Energy Series</div>
+  <div class="f-note">Independent research series · 2026</div>
+</footer>
+
+<script>
+  const cur = document.getElementById('cur');
+  const ring = document.getElementById('ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  (function loop(){
+    rx+=(mx-rx)*.13; ry+=(my-ry)*.13;
+    cur.style.left=mx+'px'; cur.style.top=my+'px';
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cur.style.width='16px';cur.style.height='16px';ring.style.width='54px';ring.style.height='54px';ring.style.opacity='.7';});
+    el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';ring.style.width='38px';ring.style.height='38px';ring.style.opacity='.4';});
+  });
+
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);} });
+  },{threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
